@@ -31,6 +31,8 @@
 #include "board_debug_probe_config.h"
 #elif defined(RASPBERRYPI_PICO) || defined(RASPBERRYPI_PICO2)
 #include "board_pico_config.h"
+#elif defined(WAVESHARE_RP2040_PIZERO)
+#include "board_pico_zero_config.h"
 #else
 #error Unsupported board
 //#include "board_example_config.h"

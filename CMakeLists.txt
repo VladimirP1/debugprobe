@@ -63,6 +63,7 @@ add_dependencies(debugprobe version)
 target_compile_definitions (debugprobe PRIVATE
 	PICO_RP2040_USB_DEVICE_ENUMERATION_FIX=1
     PICO_ENABLE_USB_RESET_VIA_VENDOR_INTERFACE=1
+    PICO_XOSC_STARTUP_DELAY_MULTIPLIER=32
 )
 
 if (NOT PICO_BOARD STREQUAL "debug_probe")
