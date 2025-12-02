@@ -47,7 +47,13 @@
 #define PROBE_UART_INTERFACE uart1
 #define PROBE_UART_BAUDRATE 115200
 
-#define PROBE_USB_CONNECTED_LED 25
+/* LED config - some or all of these can be omitted if not used */
+#define PROBE_WS2812_LED
+#define SM_WS2812  2
+#define WS2812_PIN 16
+#define PROBE_WS2812_USB_CONNECTED put_blueLED
+#define PROBE_WS2812_DAP_CONNECTED put_greenLED
+#define PROBE_WS2812_DAP_RUNNING   put_redLED
 
 #define PROBE_PRODUCT_STRING "Debugprobe on Pico (CMSIS-DAP)"
 

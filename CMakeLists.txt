@@ -45,6 +45,7 @@ target_compile_options(debugprobe PRIVATE -Wall)
 pico_generate_pio_header(debugprobe ${CMAKE_CURRENT_LIST_DIR}/src/probe.pio)
 pico_generate_pio_header(debugprobe ${CMAKE_CURRENT_LIST_DIR}/src/probe_oen.pio)
 pico_generate_pio_header(debugprobe ${CMAKE_CURRENT_LIST_DIR}/src/autobaud.pio)
+pico_generate_pio_header(debugprobe ${CMAKE_CURRENT_LIST_DIR}/src/ws2812.pio)
 
 target_include_directories(debugprobe PRIVATE src)
 
@@ -69,6 +70,12 @@ target_compile_definitions (debugprobe PRIVATE
 if (NOT PICO_BOARD STREQUAL "debug_probe")
     set_target_properties(debugprobe PROPERTIES
         OUTPUT_NAME "debugprobe_on_${PICO_BOARD}"
+    )
+endif ()
+
+if (PICO_BOARD STREQUAL "waveshare_rp2040_pizero")
+    target_sources(debugprobe PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/src/ws2812.c
     )
 endif ()
 

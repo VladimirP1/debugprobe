@@ -45,6 +45,9 @@
 #include "get_serial.h"
 #include "tusb_edpt_handler.h"
 #include "DAP.h"
+#ifdef PROBE_WS2812_LED
+#include "ws2812.h"
+#endif
 #include "hardware/structs/usb.h"
 
 // UART0 for debugprobe debug
@@ -55,15 +58,33 @@ static uint8_t RxDataBuffer[CFG_TUD_HID_EP_BUFSIZE];
 
 #define THREADED 1
 
-#define UART_TASK_PRIO (tskIDLE_PRIORITY + 3)
-#define TUD_TASK_PRIO  (tskIDLE_PRIORITY + 2)
-#define DAP_TASK_PRIO  (tskIDLE_PRIORITY + 1)
+#define UART_TASK_PRIO (tskIDLE_PRIORITY + 4)
+#define TUD_TASK_PRIO  (tskIDLE_PRIORITY + 3)
+#define DAP_TASK_PRIO  (tskIDLE_PRIORITY + 2)
+#define LED_TASK_PRIO  (tskIDLE_PRIORITY + 1)
 
-#define AUTOBAUD_TASK_PRIO  (tskIDLE_PRIORITY + 1)
+#define AUTOBAUD_TASK_PRIO  (tskIDLE_PRIORITY + 2)
 
 TaskHandle_t dap_taskhandle, tud_taskhandle, mon_taskhandle;
+#ifdef PROBE_WS2812_LED
+TaskHandle_t led_taskhandle;
+#endif
 
 static int was_configured;
+
+#ifdef PROBE_WS2812_LED
+void led_thread(void *ptr)
+{
+    TickType_t wake;
+
+    ws2812_init();
+    wake = xTaskGetTickCount();
+    do {
+      refresh_led();
+      xTaskDelayUntil(&wake, pdMS_TO_TICKS(20));
+    } while (true);
+}
+#endif
 
 void dev_mon(void *ptr)
 {
@@ -119,11 +140,13 @@ void usb_thread(void *ptr)
     wake = xTaskGetTickCount();
     do {
         tud_task();
-#ifdef PROBE_USB_CONNECTED_LED
+#if defined(PROBE_USB_CONNECTED_LED)
         if (!gpio_get(PROBE_USB_CONNECTED_LED) && tud_ready())
             gpio_put(PROBE_USB_CONNECTED_LED, 1);
         else
             gpio_put(PROBE_USB_CONNECTED_LED, 0);
+#elif defined(PROBE_WS2812_USB_CONNECTED)
+        PROBE_WS2812_USB_CONNECTED(tud_ready());
 #endif
         // implied bus-reset detection
         if (!tud_connected() && was_configured)
@@ -168,6 +191,9 @@ int main(void) {
 #if (configNUMBER_OF_CORES > 1)
         vTaskCoreAffinitySet(mon_taskhandle, (1 << 0));
 #endif
+#endif
+#ifdef PROBE_WS2812_LED
+        xTaskCreate(led_thread, "LED", configMINIMAL_STACK_SIZE, NULL, LED_TASK_PRIO, &led_taskhandle);
 #endif
         vTaskStartScheduler();
     }

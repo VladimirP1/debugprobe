@@ -49,6 +49,9 @@ This information includes:
 
 #include "cmsis_compiler.h"
 #include "probe_config.h"
+#ifdef PROBE_WS2812_LED
+#include "ws2812.h"
+#endif
 #include "probe.h"
 
 /// Processor Clock of the Cortex-M MCU used in the Debug Unit.
@@ -503,8 +506,10 @@ It is recommended to provide the following LEDs for status indication:
            - 0: Connect LED OFF: debugger is not connected to CMSIS-DAP Debug Unit.
 */
 __STATIC_INLINE void LED_CONNECTED_OUT (uint32_t bit) {
-#ifdef PROBE_DAP_CONNECTED_LED
+#if defined(PROBE_DAP_CONNECTED_LED)
   gpio_put(PROBE_DAP_CONNECTED_LED, bit);
+#elif defined(PROBE_WS2812_DAP_CONNECTED)
+  PROBE_WS2812_DAP_CONNECTED(bit);
 #endif
 }
 
@@ -514,8 +519,10 @@ __STATIC_INLINE void LED_CONNECTED_OUT (uint32_t bit) {
            - 0: Target Running LED OFF: program execution in target stopped.
 */
 __STATIC_INLINE void LED_RUNNING_OUT (uint32_t bit) {
-#ifdef PROBE_DAP_RUNNING_LED
+#if defined(PROBE_DAP_RUNNING_LED)
   gpio_put(PROBE_DAP_RUNNING_LED, bit);
+#elif defined(PROBE_WS2812_DAP_RUNNING)
+  PROBE_WS2812_DAP_RUNNING(bit);
 #endif
 }
 
